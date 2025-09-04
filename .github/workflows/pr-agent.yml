@@ -2,22 +2,29 @@ name: PR Agent
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
 
 permissions:
   pull-requests: write
-  contents: read
+  contents: write
   issues: write
 
 jobs:
-  pr-agent:
+  pr_agent_job:
+    # 봇이 쓴 코멘트에 의해 다시 돌지 않도록
+    if: ${{ github.event.sender.type != 'Bot' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Run PR Agent
-        uses: Codium-ai/pr-agent@main
+      - name: PR Agent action step
+        uses: qodo-ai/pr-agent@main  # 최신 리포/액션 경로
         env:
+          # OPENAI_KEY를 쓰는 것이 기본. 기존에 OPENAI_API_KEY 시크릿만 있다면 아래처럼 매핑해도 됨
+          OPENAI_KEY: ${{ secrets.OPENAI_KEY || secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: gpt-4o-mini
+
+          # (옵션) PR 열릴 때 자동 리뷰/설명/개선 실행
+          github_action_config.auto_review: "true"
+          # github_action_config.auto_describe: "true"
+          # github_action_config.auto_improve: "true"
