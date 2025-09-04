@@ -1,0 +1,8 @@
+review:
+  enable_review: true
+  summary: true
+  suggestions: true
+  tests: true
+  security: true
+  complexity: true
+  style: true
